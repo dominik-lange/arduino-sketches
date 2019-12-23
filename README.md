@@ -10,4 +10,4 @@ A simple clock (RTC) with output on and control through a 16x2 lcd panel.
 Sample sketches using a potentiometer.
 
 ## tonuino
-Clone of the famout tonunio sketch by Thorsten Voss. Added lcd button signals and saving the MP3 voulume in arduinos EPROM.
+Clone of the famous tonunio sketch by Thorsten Voss. Added lcd button signals and saving the MP3 voulume in arduinos EPROM.
