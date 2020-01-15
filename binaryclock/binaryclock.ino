@@ -1,6 +1,7 @@
 #include <DS3231.h>
 #include <JC_Button.h>
 
+//digital pins
 #define DATA 12
 #define STORE 11 //latch
 #define SHIFT 10
@@ -10,7 +11,9 @@
 #define BTN_SET 6
 #define BTN_DOWN 5
 #define BTN_UP 4
-
+#define BRIGHTNESS_CTRL 3
+//analog pins
+#define POTI 3
 const uint16_t LONG_PRESS = 2000;
 
 DS3231 clock;
@@ -20,8 +23,8 @@ Button upButton(BTN_UP);
 Button downButton(BTN_DOWN);
 bool showSeconds = true;
 
-void set(byte seconds, byte minutes, byte hours)
-{
+//set the time
+void set(byte seconds, byte minutes, byte hours) {
    digitalWrite(STORE, LOW);
    shiftOut(DATA, SHIFT, LSBFIRST, showSeconds ? seconds : 0);
    shiftOut(DATA, SHIFT, LSBFIRST, minutes);
@@ -35,18 +38,27 @@ void setup()
   setButton.begin();
   upButton.begin();
   downButton.begin();
+  //74hc595 connectors
   pinMode(DATA, OUTPUT);
   pinMode(STORE, OUTPUT);  
   pinMode(SHIFT, OUTPUT);
+  //buttons
   pinMode(HOUR_SET, OUTPUT);
   pinMode(MIN_SET, OUTPUT);
   pinMode(SEC_SET, OUTPUT);
+  //connected to output enable, which is active low, a PWD signal controls the brightness, thus 0 is highest, brightness and 255 would lead to all LEDs turned off
+  pinMode(BRIGHTNESS_CTRL, OUTPUT);
+  //initial brightness value
+  analogWrite(BRIGHTNESS_CTRL, 240);
+  //init RTC
   clock.begin();
   clock.setDateTime(__DATE__,__TIME__);
+  //clear shift register
   set(0,0,0);
   delay(1000);
 }
 
+//LEDs wil blink loop times
 void blink(uint8_t loops) {
   for(int i=0; i<loops; i++) {
     set(0,0,0);
@@ -56,6 +68,7 @@ void blink(uint8_t loops) {
   }
 }
 
+//handle a press on up button
 void handleUp(byte step, byte* hour, byte* mnt, byte* sec) {
   switch(step) {
     case 0:
@@ -74,6 +87,7 @@ void handleUp(byte step, byte* hour, byte* mnt, byte* sec) {
   set(*sec, *mnt, *hour);
 }
 
+//increases respective value and switch at maximum
 void handlePlus(byte* val, byte max) {
   if(*val == max) {
     *val = 0;
@@ -82,6 +96,7 @@ void handlePlus(byte* val, byte max) {
   }
 }
 
+//handle a press on down button
 void handleDown(byte step, byte* hour, byte* mnt, byte* sec) {
   switch(step) {
     case 0:
@@ -100,6 +115,7 @@ void handleDown(byte step, byte* hour, byte* mnt, byte* sec) {
   set(*sec, *mnt, *hour);
 }
 
+//decrease respective value and switch at maximum
 void handleMinus(byte* val, byte max) {
   if(*val == 0) {
     *val = max;
@@ -108,6 +124,7 @@ void handleMinus(byte* val, byte max) {
   }
 }
 
+//step through the set menu
 void menu() {
   byte step = 0;
   byte hour = 0;
@@ -147,11 +164,19 @@ void menu() {
   }
 }
 
+void handleBrightnessControl() {
+  int brightness = analogRead(POTI) / 4;
+  Serial.println(brightness);
+  analogWrite(POTI, brightness);
+}
+
 void loop() 
 {
+  handleBrightnessControl();
   setButton.read();
   upButton.read();
   downButton.read();
+  //turn off displaying seconds by pressing the up and down button at the same time for LONG_PRESS millis
   if(upButton.pressedFor(LONG_PRESS) && downButton.pressedFor(LONG_PRESS)) {
       showSeconds = !showSeconds;
       blink(2);
@@ -164,7 +189,9 @@ void loop()
   if(setButton.wasReleased()) {
     menu();
   }
+  //set the current time
   dt = clock.getDateTime();
   set(dt.second, dt.minute, dt.hour);
-  delay(100);
+  //delays the loop, higher values below 1000 millis are possible but would lead to more sluggish button and poti reavtion after press
+  delay(200);
 }
