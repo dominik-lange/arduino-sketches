@@ -9,5 +9,8 @@ A simple clock (RTC) with output on and control through a 16x2 lcd panel.
 ## poti
 Sample sketches using a potentiometer.
 
+## musicbox
+sample sketch to demonstrate how play tones with a piezo buzzer or mono speaker.
+
 ## tonuino
 Clone of the famous tonunio sketch by Thorsten Voss. Added lcd button signals and saving the MP3 voulume in arduinos EPROM.
