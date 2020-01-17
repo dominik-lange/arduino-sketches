@@ -93,24 +93,16 @@
 #define NOTE_DS8 4978
 
 /*
-  Melody
-
-  Plays a melody
+  Based on the toneMelody tutorial from arduino.cc :
+  https://www.arduino.cc/en/Tutorial/toneMelody
 
   circuit:
-  - 8 ohm speaker on digital pin 8
+  - speaker on digital pin 12
 
-  created 21 Jan 2010
-  modified 30 Aug 2011
-  by Tom Igoe
-
-  This example code is in the public domain.
-
-  http://www.arduino.cc/en/Tutorial/Tone
+  tested with Arduino mega 2560 R3, active buzzer, passive buzzer and 4 Ohm speaker (Visaton FR7)
 */
 
-
-// notes in the melody:
+//https://www.hackster.io/HiHiHiHiiHiiIiH/star-wars-on-a-buzzer-0814f2
 int starWars[] = {
   //1
   NOTE_A4, NOTE_A4, NOTE_A4, NOTE_F4, NOTE_C5, NOTE_A4, NOTE_F4, NOTE_C5, NOTE_A4, 0, 
@@ -144,18 +136,21 @@ int starWarsDurations[] = {
   4, 2, 3, 8, 2, 3, 8, 2, 4
 };
 
+//https://www.lieder-archiv.de/alle_meine_entchen-notenblatt_100055.html
 int alleMeineEntchen[] = {
   NOTE_D5, NOTE_E5, NOTE_F5, NOTE_G5, NOTE_A5, NOTE_A5,
   NOTE_B5, NOTE_B5, NOTE_B5, NOTE_B5, NOTE_A5,
-  NOTE_G5, NOTE_G5, NOTE_G5, NOTE_G5, NOTE_F5, NOTE_F5
+  NOTE_B5, NOTE_B5, NOTE_B5, NOTE_B5, NOTE_A5,
+  NOTE_G5, NOTE_G5, NOTE_G5, NOTE_G5, NOTE_F5, NOTE_F5,
   NOTE_A5, NOTE_A5, NOTE_A5, NOTE_A5, NOTE_D5
 };
 
 int alleMeineEntchenDurations[] = {
   4, 4, 4, 4, 2, 2,
   4, 4, 4, 4, 1,
-  4, 4, 4, 4, 2, 2
   4, 4, 4, 4, 1,
+  4, 4, 4, 4, 2, 2,
+  4, 4, 4, 4, 1
 };
 
 void playTune(int melody[], int durations[], int tuneLength) {
@@ -176,11 +171,12 @@ void playTune(int melody[], int durations[], int tuneLength) {
 }
 
 void setup() {
-  Serial.begin(9600);
+  
 }
 
 void loop() {
   // iterate over the notes of the melody:
   //playTune(starWars, starWarsDurations, sizeof starWars/sizeof starWars[0]);
   playTune(alleMeineEntchen, alleMeineEntchenDurations, sizeof alleMeineEntchen/sizeof alleMeineEntchen[0]);
+  delay(500);
 }
