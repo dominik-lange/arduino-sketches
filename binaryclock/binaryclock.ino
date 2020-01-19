@@ -1,186 +1,197 @@
-/*************************************************
- * Public Constants
- *************************************************/
+#include <DS3231.h>
+#include <JC_Button.h>
 
-#define NOTE_B0  31
-#define NOTE_C1  33
-#define NOTE_CS1 35
-#define NOTE_D1  37
-#define NOTE_DS1 39
-#define NOTE_E1  41
-#define NOTE_F1  44
-#define NOTE_FS1 46
-#define NOTE_G1  49
-#define NOTE_GS1 52
-#define NOTE_A1  55
-#define NOTE_AS1 58
-#define NOTE_B1  62
-#define NOTE_C2  65
-#define NOTE_CS2 69
-#define NOTE_D2  73
-#define NOTE_DS2 78
-#define NOTE_E2  82
-#define NOTE_F2  87
-#define NOTE_FS2 93
-#define NOTE_G2  98
-#define NOTE_GS2 104
-#define NOTE_A2  110
-#define NOTE_AS2 117
-#define NOTE_B2  123
-#define NOTE_C3  131
-#define NOTE_CS3 139
-#define NOTE_D3  147
-#define NOTE_DS3 156
-#define NOTE_E3  165
-#define NOTE_F3  175
-#define NOTE_FS3 185
-#define NOTE_G3  196
-#define NOTE_GS3 208
-#define NOTE_A3  220
-#define NOTE_AS3 233
-#define NOTE_B3  247
-#define NOTE_C4  262
-#define NOTE_CS4 277
-#define NOTE_D4  294
-#define NOTE_DS4 311
-#define NOTE_E4  330
-#define NOTE_F4  349
-#define NOTE_FS4 370
-#define NOTE_G4  392
-#define NOTE_GS4 415
-#define NOTE_A4  440
-#define NOTE_AS4 466
-#define NOTE_B4  494
-#define NOTE_C5  523
-#define NOTE_CS5 554
-#define NOTE_D5  587
-#define NOTE_DS5 622
-#define NOTE_E5  659
-#define NOTE_F5  698
-#define NOTE_FS5 740
-#define NOTE_G5  784
-#define NOTE_GS5 831
-#define NOTE_A5  880
-#define NOTE_AS5 932
-#define NOTE_B5  988
-#define NOTE_C6  1047
-#define NOTE_CS6 1109
-#define NOTE_D6  1175
-#define NOTE_DS6 1245
-#define NOTE_E6  1319
-#define NOTE_F6  1397
-#define NOTE_FS6 1480
-#define NOTE_G6  1568
-#define NOTE_GS6 1661
-#define NOTE_A6  1760
-#define NOTE_AS6 1865
-#define NOTE_B6  1976
-#define NOTE_C7  2093
-#define NOTE_CS7 2217
-#define NOTE_D7  2349
-#define NOTE_DS7 2489
-#define NOTE_E7  2637
-#define NOTE_F7  2794
-#define NOTE_FS7 2960
-#define NOTE_G7  3136
-#define NOTE_GS7 3322
-#define NOTE_A7  3520
-#define NOTE_AS7 3729
-#define NOTE_B7  3951
-#define NOTE_C8  4186
-#define NOTE_CS8 4435
-#define NOTE_D8  4699
-#define NOTE_DS8 4978
+//digital pins
+#define DATA 12
+#define STORE 11 //latch
+#define SHIFT 10
+#define HOUR_SET 9
+#define MIN_SET 8
+#define SEC_SET 7
+#define BTN_SET 6
+#define BTN_DOWN 5
+#define BTN_UP 4
+#define BRIGHTNESS_CTRL 3
+//analog pins
+#define POTI 3
+const uint16_t LONG_PRESS = 2000;
 
-/*
-  Melody
+DS3231 clock;
+RTCDateTime dt;
+Button setButton(BTN_SET);
+Button upButton(BTN_UP);
+Button downButton(BTN_DOWN);
+bool showSeconds = true;
 
-  Plays a melody
+//set the time
+void set(byte seconds, byte minutes, byte hours) {
+   digitalWrite(STORE, LOW);
+   shiftOut(DATA, SHIFT, LSBFIRST, showSeconds ? seconds : 0);
+   shiftOut(DATA, SHIFT, LSBFIRST, minutes);
+   shiftOut(DATA, SHIFT, LSBFIRST, hours);
+   digitalWrite(STORE, HIGH);
+}
 
-  circuit:
-  - 8 ohm speaker on digital pin 8
+void setup() 
+{
+  Serial.begin(9600);
+  setButton.begin();
+  upButton.begin();
+  downButton.begin();
+  //74hc595 connectors
+  pinMode(DATA, OUTPUT);
+  pinMode(STORE, OUTPUT);  
+  pinMode(SHIFT, OUTPUT);
+  //buttons
+  pinMode(HOUR_SET, OUTPUT);
+  pinMode(MIN_SET, OUTPUT);
+  pinMode(SEC_SET, OUTPUT);
+  //connected to output enable, which is active low, a PWD signal controls the brightness, thus 0 is highest, brightness and 255 would lead to all LEDs turned off
+  pinMode(BRIGHTNESS_CTRL, OUTPUT);
+  //initial brightness value
+  analogWrite(BRIGHTNESS_CTRL, 240);
+  //init RTC
+  clock.begin();
+  clock.setDateTime(__DATE__,__TIME__);
+  //clear shift register
+  set(0,0,0);
+  delay(1000);
+}
 
-  created 21 Jan 2010
-  modified 30 Aug 2011
-  by Tom Igoe
-
-  This example code is in the public domain.
-
-  http://www.arduino.cc/en/Tutorial/Tone
-*/
-
-
-// notes in the melody:
-int starWars[] = {
-  //1
-  NOTE_A4, NOTE_A4, NOTE_A4, NOTE_F4, NOTE_C5, NOTE_A4, NOTE_F4, NOTE_C5, NOTE_A4, 0, 
-  NOTE_E5, NOTE_E5, NOTE_E5, NOTE_F5, NOTE_C5, NOTE_GS4, NOTE_F4, NOTE_C5, NOTE_A4, 0,
-  //2
-  NOTE_A5, NOTE_A4, NOTE_A4, NOTE_A5, NOTE_GS5, NOTE_G5, NOTE_FS5, NOTE_F5, NOTE_FS5, 0,
-  NOTE_A5, NOTE_D5, NOTE_D4, NOTE_C5, NOTE_C5, NOTE_B4, NOTE_C5, 0,
-  //var1
-  NOTE_F4, NOTE_GS4, NOTE_F4, NOTE_A4, NOTE_C5, NOTE_A4, NOTE_C5, NOTE_E5, 0,
-  //2
-  NOTE_A5, NOTE_A4, NOTE_A4, NOTE_A5, NOTE_GS5, NOTE_G5, NOTE_FS5, NOTE_F5, NOTE_FS5, 0,
-  NOTE_A5, NOTE_D5, NOTE_D4, NOTE_C5, NOTE_C5, NOTE_B4, NOTE_C5, 0,
-  //var2
-  NOTE_F4, NOTE_GS4, NOTE_F4, NOTE_C5, NOTE_A4, NOTE_F4, NOTE_C5, NOTE_A4, 0
-};
-
-// note durations: 4 = quarter note, 8 = eighth note, etc.:
-int starWarsDurations[] = {
-  //1
-  2, 2, 2, 3, 8, 2, 3, 8, 1, 8, 
-  2, 2, 2, 3, 8, 2, 3, 8, 2, 8,
-  //2
-  2, 3, 8, 2, 3, 8, 8, 8, 4, 4,
-  4, 2, 3, 8, 8, 8, 4, 4,
-  //var1
-  4, 2, 3, 8, 2, 3, 8, 2, 4,
-  //2
-  2, 3, 8, 2, 3, 8, 8, 8, 4, 4,
-  4, 2, 3, 8, 8, 8, 4, 4,
-  //var2
-  4, 2, 3, 8, 2, 3, 8, 2, 4
-};
-
-int alleMeineEntchen[] = {
-  NOTE_D5, NOTE_E5, NOTE_F5, NOTE_G5, NOTE_A5, NOTE_A5,
-  NOTE_B5, NOTE_B5, NOTE_B5, NOTE_B5, NOTE_A5,
-  NOTE_G5, NOTE_G5, NOTE_G5, NOTE_G5, NOTE_F5, NOTE_F5
-  NOTE_A5, NOTE_A5, NOTE_A5, NOTE_A5, NOTE_D5
-};
-
-int alleMeineEntchenDurations[] = {
-  4, 4, 4, 4, 2, 2,
-  4, 4, 4, 4, 1,
-  4, 4, 4, 4, 2, 2
-  4, 4, 4, 4, 1,
-};
-
-void playTune(int melody[], int durations[], int tuneLength) {
-  for (int thisNote = 0; thisNote < tuneLength; thisNote++) {
-
-    // to calculate the note duration, take one second divided by the note type.
-    //e.g. quarter note = 1000 / 4, eighth note = 1000/8, etc.
-    int noteDuration = 1000 / durations[thisNote];
-    tone(12, melody[thisNote], noteDuration);
-
-    // to distinguish the notes, set a minimum time between them.
-    // the note's duration + 30% seems to work well:
-    int pauseBetweenNotes = noteDuration * 1.30;
-    delay(pauseBetweenNotes);
-    // stop the tone playing:
-    noTone(12);
+//LEDs wil blink loop times
+void blink(uint8_t loops) {
+  for(int i=0; i<loops; i++) {
+    set(0,0,0);
+    delay(200);
+    set(59,59,23);
+    delay(200);
   }
 }
 
-void setup() {
-  Serial.begin(9600);
+//handle a press on up button
+void handleUp(byte step, byte* hour, byte* mnt, byte* sec) {
+  switch(step) {
+    case 0:
+      handlePlus(hour, 23);
+      Serial.println(*hour);
+      break;
+    case 1:
+        handlePlus(mnt, 59);
+        Serial.println(*mnt);
+      break;
+    case 2:
+      handlePlus(sec, 59);
+      Serial.println(*sec);
+      break;
+  }
+  set(*sec, *mnt, *hour);
 }
 
-void loop() {
-  // iterate over the notes of the melody:
-  //playTune(starWars, starWarsDurations, sizeof starWars/sizeof starWars[0]);
-  playTune(alleMeineEntchen, alleMeineEntchenDurations, sizeof alleMeineEntchen/sizeof alleMeineEntchen[0]);
+//increases respective value and switch at maximum
+void handlePlus(byte* val, byte max) {
+  if(*val == max) {
+    *val = 0;
+  } else {
+    (*val)++;
+  }
+}
+
+//handle a press on down button
+void handleDown(byte step, byte* hour, byte* mnt, byte* sec) {
+  switch(step) {
+    case 0:
+      handleMinus(hour, 23);
+        Serial.println(*hour);
+      break;
+    case 1:
+        handleMinus(mnt, 59);
+        Serial.println(*mnt);
+      break;
+    case 2:
+        handleMinus(sec, 59); 
+        Serial.println(*sec);
+      break;
+  }
+  set(*sec, *mnt, *hour);
+}
+
+//decrease respective value and switch at maximum
+void handleMinus(byte* val, byte max) {
+  if(*val == 0) {
+    *val = max;
+  } else {
+     (*val)--;
+  }
+}
+
+//step through the set menu
+void menu() {
+  byte step = 0;
+  byte hour = 0;
+  byte mnt = 0;
+  byte sec = 0;
+  digitalWrite(HOUR_SET, HIGH);
+  set(0,0,0);
+  delay(25);
+  while(step < 3) {
+    upButton.read();
+    downButton.read();
+    setButton.read();
+    if(upButton.wasReleased()) {
+      handleUp(step, &hour, &mnt, &sec);
+    }
+    if(downButton.wasReleased()) {
+      handleDown(step, &hour, &mnt, &sec);
+    }
+    if(setButton.wasReleased()) {
+      switch(++step) {
+        case 1:
+          digitalWrite(HOUR_SET, LOW);
+          digitalWrite(MIN_SET, HIGH);
+          break;
+        case 2:
+          digitalWrite(MIN_SET, LOW);
+          digitalWrite(SEC_SET, HIGH);
+          break;
+        case 3:
+          digitalWrite(SEC_SET, LOW);
+      }
+    }
+    delay(100);
+  }
+  if(hour > 0 || mnt > 0 || sec > 0) {
+    clock.setDateTime(2020, 1, 1, hour, mnt, sec);
+  }
+}
+
+void handleBrightnessControl() {
+  int brightness = analogRead(POTI) / 4;
+  Serial.println(brightness);
+  analogWrite(POTI, brightness);
+}
+
+void loop() 
+{
+  handleBrightnessControl();
+  setButton.read();
+  upButton.read();
+  downButton.read();
+  //turn off displaying seconds by pressing the up and down button at the same time for LONG_PRESS millis
+  if(upButton.pressedFor(LONG_PRESS) && downButton.pressedFor(LONG_PRESS)) {
+      showSeconds = !showSeconds;
+      blink(2);
+      //set correct time before delay not to confuse the user
+      dt = clock.getDateTime();
+      set(dt.second, dt.minute, dt.hour);
+      //delay is necessary to avoid flip again when buttons are pressed slightly too long
+      delay(2000);
+  } 
+  if(setButton.wasReleased()) {
+    menu();
+  }
+  //set the current time
+  dt = clock.getDateTime();
+  set(dt.second, dt.minute, dt.hour);
+  //delays the loop, higher values below 1000 millis are possible but would lead to more sluggish button and poti reavtion after press
+  delay(200);
 }
