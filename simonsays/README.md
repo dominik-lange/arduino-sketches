@@ -13,7 +13,7 @@ Entering this mode the user can press any button and the correspondig LED blink 
 Pressing the interrupt button will leave this mode starting with the attraction mode.
 
 ## Wiring
-![simonsays_schematic.png][breadborad schematic]
+![breadborad schematic](simonsays_schematic.png)
 
 ## TODO
  - display level on a 7 segemnt display, an LCD, or similar
@@ -24,4 +24,5 @@ Pressing the interrupt button will leave this mode starting with the attraction 
 
 ## Desclaimer
 The code is based on the sketch presented in this sparkfun tutorial : https://learn.sparkfun.com/tutorials/sik-experiment-guide-for-arduino---v32/experiment-16-simon-says
+
 It is free to use and comes with no restrictions.
