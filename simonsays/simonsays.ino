@@ -1,3 +1,30 @@
+/* Adaption of the simon says memorygame
+** Based on the tutorial from sparkfun: https://learn.sparkfun.com/tutorials/sik-experiment-guide-for-arduino---v32/experiment-16-simon-says
+** 
+** Shopping list
+** - Arduino board (such as Nano, Uno or Mega)
+** - 5 push buttons
+** - 1 piezo buzzer (active or poassive doesn't matter)
+** - 4 LEDS (yellow, green, red, blue)
+** - 4 220 Ohm resistors
+** - breadboard and jumper cables
+**
+** Wiring
+** The LEDS and the resistors should be connected to the arduino as follows (all to ground of course)
+** - yellow to D12
+** - green to D11
+** - red to D10
+** - blue to D9
+** Buzzer should be connected to D6 (need to be a PWM capable pin - check your board pinout) and to ground
+** Interrupt button to D8 and to ground
+** Yellow button to D5 and ground
+** Green button to D4 and ground
+** Red button to D3 and ground
+** Blue buitton to D2 and ground
+**
+** This code is free and comes with no restrictions
+*/
+
 #define CHOICE_OFF      0 //Used to control LEDs
 #define CHOICE_NONE     0 //Used to check buttons
 #define CHOICE_RED  (1 << 0)
