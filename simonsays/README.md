@@ -13,8 +13,7 @@ Entering this mode the user can press any button and the correspondig LED blink 
 Pressing the interrupt button will leave this mode starting with the attraction mode.
 
 ## Wiring
-
-TODO : insert picture
+![simonsays_schematic.png][breadborad schematic]
 
 ## TODO
  - display level on a 7 segemnt display, an LCD, or similar
