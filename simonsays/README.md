@@ -24,5 +24,3 @@ Pressing the interrupt button will leave this mode starting with the attraction 
 
 ## Desclaimer
 The code is based on the sketch presented in this sparkfun tutorial : https://learn.sparkfun.com/tutorials/sik-experiment-guide-for-arduino---v32/experiment-16-simon-says
-
-It is free to use and comes with no restrictions.
