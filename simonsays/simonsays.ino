@@ -91,7 +91,7 @@ void loop() {
     setLEDs(CHOICE_OFF); // Turn off LEDs
     delay(250);
     // Play memory game and handle result
-    if (play_memory() == true) 
+    if (playMemory() == true) 
       playWinner(); // Player won, play winner tones
     else 
       playLoser(); // Player lost, play loser tones
@@ -148,13 +148,13 @@ byte determineGameMode(byte button) {
 
 // Play the regular memory game
 // Returns 0 if player loses, or 1 if player wins
-boolean play_memory() {
+boolean playMemory() {
   randomSeed(millis()); // Seed the random generator with random amount of millis()
 
   gameRound = 0; // Reset the game to the beginning
 
   while (gameRound < ROUNDS_TO_WIN) {
-    add_to_moves(); // Add a button to the current moves, then play them back
+    addToMoves(); // Add a button to the current moves, then play them back
 
     playMoves(); // Play back the current game board
 
@@ -197,7 +197,7 @@ void playMoves() {
 
 
 // Adds a new random button to the game sequence, by sampling the timer
-void add_to_moves(void) {
+void addToMoves() {
   byte newButton = random(0, 4); //min (included), max (exluded)
 
   // We have to convert this number, 0 to 3, to CHOICEs

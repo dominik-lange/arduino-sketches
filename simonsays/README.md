@@ -22,3 +22,7 @@ TODO : insert picture
  - add modes (such as battle mode, etc...)
  - keep track of high score and display it (incl. enetring name after finih)
  - add difficulty levels (faster blinks, more levels) --> probably menu setup to adjust settings
+
+## Desclaimer
+The code is based on the sketch presented in this sparkfun tutorial : https://learn.sparkfun.com/tutorials/sik-experiment-guide-for-arduino---v32/experiment-16-simon-says
+It is free to use and comes with no restrictions.
