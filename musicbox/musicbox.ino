@@ -97,7 +97,7 @@
   https://www.arduino.cc/en/Tutorial/toneMelody
 
   circuit:
-  - speaker on digital pin 12
+  - speaker on digital pin 12^^
 
   tested with Arduino mega 2560 R3, active buzzer, passive buzzer and 4 Ohm speaker (Visaton FR7)
 */

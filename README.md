@@ -14,3 +14,6 @@ sample sketch to demonstrate how play tones with a piezo buzzer or mono speaker.
 
 ## tonuino
 Clone of the famous tonunio sketch by Thorsten Voss. Added lcd button signals and saving the MP3 voulume in arduinos EPROM.
+
+## simonsays
+Adaption of the simon says memory game.
