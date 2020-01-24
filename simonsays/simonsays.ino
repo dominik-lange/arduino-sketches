@@ -25,6 +25,8 @@
 ** This code is free and comes with no restrictions
 */
 
+#include <avr/sleep.h>
+
 #define CHOICE_OFF      0 //Used to control LEDs
 #define CHOICE_NONE     0 //Used to check buttons
 #define CHOICE_RED  (1 << 0)
@@ -39,10 +41,10 @@
 #define LED_YELLOW  12
 
 // Button pin definitions
-#define BUTTON_INTERRUPT 8
+#define BUTTON_INTERRUPT 2
 #define BUTTON_RED    3
 #define BUTTON_GREEN  4
-#define BUTTON_BLUE   2
+#define BUTTON_BLUE   7
 #define BUTTON_YELLOW 5
 
 // Buzzer pin definition
@@ -51,6 +53,7 @@
 // Define game parameters
 #define ROUNDS_TO_WIN      13 //Number of rounds to succesfully remember before you win. 13 is do-able.
 #define ENTRY_TIME_LIMIT   5000 //Amount of time to press a button before game times out. 3000ms = 3 sec
+#define STANDBY_TIME       180000 //Time to go in standby if no action is taken in the attract mode
 
 #define MODE_SIMON_SAYS  0
 #define MODE_MUSIC 1
@@ -111,6 +114,7 @@ void loop() {
 // Show an "attract mode" display while waiting for user to press button.
 byte attractMode() {
   byte buttonPress = CHOICE_NONE;
+  unsigned long attactStart = millis();
   while(1) 
   {
     setLEDs(CHOICE_RED);
@@ -132,6 +136,10 @@ byte attractMode() {
     delay(175);
     buttonPress = checkButton();
     if (buttonPress != CHOICE_NONE) return buttonPress;
+
+    if(millis() - attactStart > STANDBY_TIME) {
+      enterStandby();
+    }
   }
 }
 
@@ -141,6 +149,18 @@ byte determineGameMode(byte button) {
   }
   //default game mode
   return MODE_SIMON_SAYS;
+}
+
+void enterStandby() {
+  attachInterrupt(0, wakeup, LOW);
+  set_sleep_mode(SLEEP_MODE_STANDBY);
+  sleep_enable();
+  sleep_mode();
+  sleep_disable();
+}
+
+void wakeup() {
+  detachInterrupt(0);
 }
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
