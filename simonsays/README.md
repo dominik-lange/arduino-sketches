@@ -15,12 +15,12 @@ Pressing the interrupt button will leave this mode starting with the attraction 
 ## Wiring
 ![breadborad schematic](simonsays_schematic.png)
 
-## TODO
+## Possible improvements
  - display level on a 7 segemnt display, an LCD, or similar
  - Make volume adjustable with poti - probably use a speaker instead of a buzzer
  - add modes (such as battle mode, etc...)
  - keep track of high score and display it (incl. enetring name after finih)
  - add difficulty levels (faster blinks, more levels) --> probably menu setup to adjust settings
 
-## Desclaimer
+## Kudos
 The code is based on the sketch presented in this sparkfun tutorial : https://learn.sparkfun.com/tutorials/sik-experiment-guide-for-arduino---v32/experiment-16-simon-says
