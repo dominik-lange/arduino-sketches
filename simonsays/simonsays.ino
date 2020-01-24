@@ -16,11 +16,11 @@
 ** - red to D10
 ** - blue to D9
 ** Buzzer should be connected to D6 (need to be a PWM capable pin - check your board pinout) and to ground
-** Interrupt button to D8 and to ground
+** Interrupt button to D2 and to ground (need to be a connected to an interrupt of the microcontroller)
 ** Yellow button to D5 and ground
 ** Green button to D4 and ground
 ** Red button to D3 and ground
-** Blue buitton to D2 and ground
+** Blue buitton to D7 and ground
 **
 ** This code is free and comes with no restrictions
 */
