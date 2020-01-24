@@ -29,11 +29,12 @@
 
 #define CHOICE_OFF      0 //Used to control LEDs
 #define CHOICE_NONE     0 //Used to check buttons
-#define CHOICE_RED  (1 << 0)
-#define CHOICE_GREEN    (1 << 1)
-#define CHOICE_BLUE (1 << 2)
-#define CHOICE_YELLOW   (1 << 3)
-#define CHOICE_INTERRUPT (1 << 4)
+#define CHOICE_INTERRUPT (1 << 0) //1
+#define CHOICE_RED  (1 << 1) // 2
+#define CHOICE_GREEN    (1 << 2) //4
+#define CHOICE_BLUE (1 << 3) //8
+#define CHOICE_YELLOW   (1 << 4) //16
+
 
 #define LED_RED     10
 #define LED_GREEN   11
@@ -55,13 +56,19 @@
 #define ENTRY_TIME_LIMIT   5000 //Amount of time to press a button before game times out. 3000ms = 3 sec
 #define STANDBY_TIME       180000 //Time to go in standby if no action is taken in the attract mode
 
-#define MODE_SIMON_SAYS  0
-#define MODE_MUSIC 1
+//Game modes
+//Unknown means the mode cannot be evaulated and needs to read again
+#define MODE_UNKNOWN 0
+#define MODE_SIMON_SAYS  1
+#define MODE_MUSIC 2
 
 // Game state variables
 byte gameBoard[32]; //Contains the combination of buttons as we advance
 byte gameRound = 0; //Counts the number of succesful rounds the player has made it through
-uint8_t gameMode = MODE_SIMON_SAYS; //Default mode is simon says
+uint8_t gameMode = MODE_UNKNOWN; //Unset at the start in order to read it from button press
+
+//init attract mode start time - it needs to be defined globally in order to reset it when coming back from standby
+unsigned long attractStart = 0;
 
 void setup() {
   Serial.begin(9600);
@@ -83,9 +90,12 @@ void setup() {
 }
 
 void loop() {
-  // Blink lights while waiting for user to press a button
-  byte buttonPress = attractMode(); 
-  gameMode = determineGameMode(buttonPress);
+  gameMode = MODE_UNKNOWN;
+  while(gameMode == MODE_UNKNOWN) {
+    // Blink lights while waiting for user to press a button
+    byte buttonPress = attractMode(); 
+    gameMode = determineGameMode(buttonPress);
+  }
 
   if(gameMode == MODE_SIMON_SAYS) {
     // Indicate the start of game play
@@ -114,7 +124,7 @@ void loop() {
 // Show an "attract mode" display while waiting for user to press button.
 byte attractMode() {
   byte buttonPress = CHOICE_NONE;
-  unsigned long attactStart = millis();
+  attractStart = millis();
   while(1) 
   {
     setLEDs(CHOICE_RED);
@@ -137,15 +147,20 @@ byte attractMode() {
     buttonPress = checkButton();
     if (buttonPress != CHOICE_NONE) return buttonPress;
 
-    if(millis() - attactStart > STANDBY_TIME) {
+    if(millis() - attractStart > STANDBY_TIME) {
       enterStandby();
     }
   }
 }
 
 byte determineGameMode(byte button) {
+  Serial.print("Button : ");
+  Serial.println(button);
   if(button == CHOICE_BLUE) {
     return MODE_MUSIC;
+  }
+  if(button == CHOICE_INTERRUPT) {
+    return MODE_UNKNOWN;
   }
   //default game mode
   return MODE_SIMON_SAYS;
@@ -154,13 +169,17 @@ byte determineGameMode(byte button) {
 void enterStandby() {
   attachInterrupt(0, wakeup, LOW);
   set_sleep_mode(SLEEP_MODE_STANDBY);
+  setLEDs(CHOICE_OFF);
   sleep_enable();
   sleep_mode();
   sleep_disable();
+  attractStart = millis();
 }
 
 void wakeup() {
+  delay(100);
   detachInterrupt(0);
+  delay(100);
 }
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
