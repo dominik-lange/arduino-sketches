@@ -14,6 +14,7 @@
 #define BRIGHTNESS_CTRL 3
 //analog pins
 #define POTI 3
+
 const uint16_t LONG_PRESS = 2000;
 
 DS3231 clock;
@@ -52,7 +53,6 @@ void setup()
   analogWrite(BRIGHTNESS_CTRL, 240);
   //init RTC
   clock.begin();
-  clock.setDateTime(__DATE__,__TIME__);
   //clear shift register
   set(0,0,0);
   delay(1000);
