@@ -1,3 +1,11 @@
+/* Demo sketch to demonstrate how to multiplex a 4 digits seven segment display (SH5461AS - common cathode) without a library.
+ * In order to save some GIO pins a 74HC595 shift register is used to drive the segments
+ * 4 transistors are used to control the digit-position to be displayed.
+ * 
+ */
+
+
+
 //hc595
 #define HC595_SER 7
 #define HC595_RCLK 6
